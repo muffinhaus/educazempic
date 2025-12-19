@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Login</title>
+  </head>
+  <body style="font-family: Arial; max-width: 400px; margin: 50px auto">
+    <h1>🔐 Login</h1>
+    <input
+      id="username"
+      placeholder="admin"
+      style="width: 100%; padding: 10px; margin: 5px 0; box-sizing: border-box"
+    />
+    <input
+      id="pass"
+      type="password"
+      placeholder="password"
+      style="width: 100%; padding: 10px; margin: 5px 0; box-sizing: border-box"
+    />
+    <button
+      onclick="login()"
+      style="
+        width: 100%;
+        padding: 12px;
+        background: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
+      "
+    >
+      Entrar
+    </button>
+    <p id="error" style="color: red"></p>
+
+    <script>
+      async function login() {
+        const username = document.getElementById('username').value;
+        const pass = document.getElementById('pass').value;
+        const errorEl = document.getElementById('error');
+        errorEl.textContent = '';
+
+        try {
+          const res = await fetch('http://127.0.0.1:8080/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, pass }),
+          });
+
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Error');
+
+          if (data.role === 'ROLE_ADMIN') window.location.href = 'admin.html';
+          else window.location.href = 'student.html';
+        } catch (err) {
+          errorEl.textContent = err.message;
+        }
+      }
+    </script>
+  </body>
+</html>
