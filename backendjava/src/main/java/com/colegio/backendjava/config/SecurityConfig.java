@@ -1,7 +1,5 @@
 package com.colegio.backendjava.config;
 
-import org.springframework.web.cors.*;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -9,9 +7,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.config.Customizer;
 
 @Configuration
 @EnableWebSecurity
@@ -21,25 +17,13 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ← CORS FIJO
+                .cors(Customizer.withDefaults()) // ← USA CorsConfig existente
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/**").permitAll() // ← TODO PERMITIDO
+                        .requestMatchers("/auth/**").permitAll()
                         .anyRequest().authenticated())
-                .httpBasic();
+                .httpBasic(Customizer.withDefaults()); // ← FIJO deprecated
 
         return http.build();
-    }
-
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOriginPattern("*");
-        config.addAllowedMethod("*");
-        config.addAllowedHeader("*");
-        config.setAllowCredentials(true);
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
     }
 
     @Bean
