@@ -37,4 +37,5 @@ public class UsuarioService {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'registrar'");
     }
+
 }

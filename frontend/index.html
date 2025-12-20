@@ -21,7 +21,7 @@
       style="
         width: 100%;
         padding: 12px;
-        background: #007bff;
+        background: #520997;
         color: white;
         border: none;
         cursor: pointer;
@@ -31,29 +31,7 @@
     </button>
     <p id="error" style="color: red"></p>
 
-    <script>
-      async function login() {
-        const username = document.getElementById('username').value;
-        const pass = document.getElementById('pass').value;
-        const errorEl = document.getElementById('error');
-        errorEl.textContent = '';
-
-        try {
-          const res = await fetch('http://127.0.0.1:8080/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, pass }),
-          });
-
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error || 'Error');
-
-          if (data.role === 'ROLE_ADMIN') window.location.href = 'admin.html';
-          else window.location.href = 'student.html';
-        } catch (err) {
-          errorEl.textContent = err.message;
-        }
-      }
-    </script>
+    <!-- RUTA RELATIVA CORRECTA -->
+    <script src="./js/login.js"></script>
   </body>
 </html>

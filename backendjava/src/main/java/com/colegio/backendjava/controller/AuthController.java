@@ -48,9 +48,12 @@ public class AuthController {
             String newUsername = request.get("newUsername");
             String newPass = request.get("newPass");
             Usuario newUser = usuarioService.registrar(newUsername, newPass);
-            return ResponseEntity.ok(Map.of("message", "✅ Estudiante registrado", "username", newUser.getUsername()));
+            return ResponseEntity.ok(Map.of("message", "✅ Estudiante registrado",
+                    "username", newUser.getUsername()));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Error al registrar"));
+            return ResponseEntity.badRequest().body(Map.of("error",
+                    "Error al registrar"));
         }
     }
+
 }
