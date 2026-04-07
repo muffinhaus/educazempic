@@ -64,3 +64,307 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+
+🧭 FASE 1 — CRUD completo con Laravel + Blade
+🎯 Proyecto: CRUD de Tareas (Tasks)
+
+Vamos a construir:
+
+Listado de tareas
+Crear tarea
+Editar tarea
+Eliminar tarea
+🧱 PASO 1 — Crear modelo + migración + controlador
+
+En tu proyecto Laravel:
+
+php artisan make:model Task -mcr
+
+Esto crea:
+
+Modelo (Task.php)
+Migración
+Controlador con métodos CRUD
+🗄️ PASO 2 — Definir la base de datos
+
+Abre la migración (database/migrations/...create_tasks_table.php):
+
+public function up()
+{
+    Schema::create('tasks', function (Blueprint $table) {
+        $table->id();
+        $table->string('title');
+        $table->text('description')->nullable();
+        $table->boolean('completed')->default(false);
+        $table->timestamps();
+    });
+}
+
+Ejecuta:
+
+php artisan migrate
+🧠 PASO 3 — Modelo
+
+app/Models/Task.php
+
+protected $fillable = ['title', 'description', 'completed'];
+🌐 PASO 4 — Rutas (MUY IMPORTANTE)
+
+routes/web.php
+
+use App\Http\Controllers\TaskController;
+
+Route::resource('tasks', TaskController::class);
+
+👉 Esto crea automáticamente:
+
+GET /tasks
+GET /tasks/create
+POST /tasks
+etc.
+🎮 PASO 5 — Controlador (lógica)
+
+app/Http/Controllers/TaskController.php
+
+INDEX (listar)
+public function index()
+{
+    $tasks = Task::all();
+    return view('tasks.index', compact('tasks'));
+}
+CREATE (formulario)
+public function create()
+{
+    return view('tasks.create');
+}
+STORE (guardar)
+public function store(Request $request)
+{
+    $request->validate([
+        'title' => 'required|max:255',
+    ]);
+
+    Task::create($request->all());
+
+    return redirect()->route('tasks.index');
+}
+EDIT
+public function edit(Task $task)
+{
+    return view('tasks.edit', compact('task'));
+}
+UPDATE
+public function update(Request $request, Task $task)
+{
+    $request->validate([
+        'title' => 'required|max:255',
+    ]);
+
+    $task->update($request->all());
+
+    return redirect()->route('tasks.index');
+}
+DELETE
+public function destroy(Task $task)
+{
+    $task->delete();
+    return redirect()->route('tasks.index');
+}
+🎨 PASO 6 — Vistas Blade
+
+Crea carpeta:
+
+resources/views/tasks/
+📄 index.blade.php
+<h1>Lista de tareas</h1>
+
+<a href="{{ route('tasks.create') }}">Nueva tarea</a>
+
+<ul>
+@foreach($tasks as $task)
+    <li>
+        {{ $task->title }}
+
+        <a href="{{ route('tasks.edit', $task) }}">Editar</a>
+
+        <form action="{{ route('tasks.destroy', $task) }}" method="POST">
+            @csrf
+            @method('DELETE')
+            <button type="submit">Eliminar</button>
+        </form>
+    </li>
+@endforeach
+</ul>
+➕ create.blade.php
+<h1>Crear tarea</h1>
+
+<form action="{{ route('tasks.store') }}" method="POST">
+    @csrf
+
+    <input type="text" name="title" placeholder="Título">
+    <textarea name="description"></textarea>
+
+    <button type="submit">Guardar</button>
+</form>
+✏️ edit.blade.php
+<h1>Editar tarea</h1>
+
+<form action="{{ route('tasks.update', $task) }}" method="POST">
+    @csrf
+    @method('PUT')
+
+    <input type="text" name="title" value="{{ $task->title }}">
+    <textarea name="description">{{ $task->description }}</textarea>
+
+    <button type="submit">Actualizar</button>
+</form>
+🚀 PASO 7 — Probar
+
+Arranca:
+
+php artisan serve
+
+Ve a:
+
+http://127.0.0.1:8000/tasks
+🧠 LO QUE ESTÁS APRENDIENDO (clave real)
+
+Aquí está lo importante de verdad:
+
+🔁 Flujo completo backend → frontend (Blade)
+📦 MVC real
+🧾 Formularios con CSRF
+✅ Validaciones
+🔗 Rutas REST profesionales
+
+👉 Esto es EXACTAMENTE lo que hay en empresas (antes de meter React).
+
+✅ 1. VALIDACIONES BIEN HECHAS (Form Request)
+
+En vez de validar en el controlador:
+
+php artisan make:request StoreTaskRequest
+
+Dentro:
+
+public function rules()
+{
+    return [
+        'title' => 'required|max:255',
+        'description' => 'nullable',
+    ];
+}
+
+En el controlador:
+
+public function store(StoreTaskRequest $request)
+{
+    Task::create($request->validated());
+    return redirect()->route('tasks.index');
+}
+
+👉 Esto es MUY importante en empresas.
+
+🎯 2. MENSAJES FLASH (UX real)
+
+En store, update, delete:
+
+return redirect()->route('tasks.index')
+    ->with('success', 'Tarea creada correctamente');
+
+En Blade (index.blade.php):
+
+@if(session('success'))
+    <p style="color: green;">
+        {{ session('success') }}
+    </p>
+@endif
+☑️ 3. COMPLETAR TAREA (lógica real)
+
+Añade checkbox en edit:
+
+<input type="checkbox" name="completed" value="1"
+    {{ $task->completed ? 'checked' : '' }}>
+
+En update:
+
+$task->update([
+    'title' => $request->title,
+    'description' => $request->description,
+    'completed' => $request->has('completed'),
+]);
+🧠 4. MEJORAR LISTADO
+
+En index:
+
+@foreach($tasks as $task)
+    <li>
+        @if($task->completed)
+            <s>{{ $task->title }}</s>
+        @else
+            {{ $task->title }}
+        @endif
+    </li>
+@endforeach
+
+👉 Ya estás aplicando lógica visual (muy importante).
+
+🛡️ 5. CONFIRMACIÓN AL BORRAR
+<form ... onsubmit="return confirm('¿Seguro que quieres eliminar esta tarea?')">
+🔐 6. (CLAVE) SIGUIENTE PASO REAL: AUTENTICACIÓN
+
+Aquí empieza lo serio de verdad.
+
+php artisan breeze:install
+npm install && npm run dev
+php artisan migrate
+
+👉 Esto te da:
+
+Login
+Register
+Sesiones
+Protección de rutas
+🔒 PROTEGER TU CRUD
+Route::middleware('auth')->group(function () {
+    Route::resource('tasks', TaskController::class);
+});
+🧠 NIVEL EMPRESA (MUY IMPORTANTE)
+
+El siguiente salto mental que debes hacer:
+
+👉 Ahora mismo tus tareas son globales
+👉 En empresa: cada usuario tiene sus tareas
+
+🧩 Relación usuario → tareas
+
+En modelo Task:
+
+public function user()
+{
+    return $this->belongsTo(User::class);
+}
+
+En migración:
+
+$table->foreignId('user_id')->constrained()->cascadeOnDelete();
+
+En store:
+
+Task::create([
+    ...$request->validated(),
+    'user_id' => auth()->id(),
+]);
+
+En index:
+
+$tasks = Task::where('user_id', auth()->id())->get();
+🚀 DONDE ESTÁS AHORA
+
+Has pasado de:
+👉 “tutorial básico”
+a
+👉 “backend real con lógica profesional”
+
+🧭

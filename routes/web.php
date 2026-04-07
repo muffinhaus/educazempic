@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\TaskController;
+
 
 Route::get('/', function () {
     return view('home');
@@ -22,3 +24,6 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/perfil', function () {
     return view('dashboard/perfil');
 })->middleware('auth')->name('perfil');
+
+
+Route::resource('tasks', TaskController::class);
